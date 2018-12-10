@@ -1,0 +1,2 @@
+# bidifac
+Bidimensional matrix factorization
