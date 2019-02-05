@@ -1,3 +1,13 @@
+###################################################
+##Simulation studies using BIDIFAC() (new)
+##Author: Jun Young Park
+##Contact: park1131@umn.edu
+###################################################
+
+set.seed(1131)
+
+#Generate simulated data
+simData=BIDsim(m=100, n=100, rkJ = 2, rkC=2, rkR=2, rkI=3, SNR=1)
 
 ###################################################
 ##Simulation studies using BIDIFAC()
@@ -16,7 +26,7 @@ set.seed(1131)
 # simData=BIDsim(m=100, n=100, rkJ=getrk$rkJ, rkC=getrk$rkC, rkR=getrk$rkR, rkI = getrk$rkI, SNR=2)
 
 #When ranks are specified
-simData=BIDsim(m=100, n=100, rkG = 3, rkC=2, rkR=2, rkI=3, SNR=2)
+simData=BIDsim(m=100, n=100, rkJ = 3, rkC=2, rkR=2, rkI=3, SNR=2)
 
 
 ###################################################
@@ -27,10 +37,10 @@ fit=BIDIFAC(list(simData$X[[1]], simData$X[[2]]), list(simData$X[[3]], simData$X
 
 #Summarize the error terms
 tbl=cbind(
-  c( frob(fit$X1.global[[1]]-simData$G[[1]])/frob(simData$G[[1]]),
-     frob(fit$X1.global[[2]]-simData$G[[2]])/frob(simData$G[[2]]),
-     frob(fit$X2.global[[1]]-simData$G[[3]])/frob(simData$G[[3]]),
-     frob(fit$X2.global[[2]]-simData$G[[4]])/frob(simData$G[[4]])),
+  c( frob(fit$X1.joint[[1]]-simData$J[[1]])/frob(simData$J[[1]]),
+     frob(fit$X1.joint[[2]]-simData$J[[2]])/frob(simData$J[[2]]),
+     frob(fit$X2.joint[[1]]-simData$J[[3]])/frob(simData$J[[3]]),
+     frob(fit$X2.joint[[2]]-simData$J[[4]])/frob(simData$J[[4]])),
   c( frob(fit$X1.col[[1]]-simData$C[[1]])/frob(simData$C[[1]]),
      frob(fit$X1.col[[2]]-simData$C[[2]])/frob(simData$C[[2]]),
      frob(fit$X2.col[[1]]-simData$C[[3]])/frob(simData$C[[3]]),
@@ -49,11 +59,11 @@ colnames(tbl)=c("Global Error", "Column Error", "Row Error", "Individual Error")
 rownames(tbl)=c("X11", "X12", "X21", "X22")
 
 tbl
-#    Global Error Column Error  Row Error Individual Error
-#X11   0.07647018   0.08634417 0.07839756        0.1643988
-#X12   0.06802652   0.08067275 0.08059401        0.1686063
-#X21   0.06606632   0.08096843 0.08169410        0.2507125
-#X22   0.11996727   0.08973148 0.07860975        0.1720027
+#     Global Error Column Error  Row Error Individual Error
+# X11   0.08773571   0.08684621 0.07185276        0.1311311
+# X12   0.08282229   0.11364179 0.07535306        0.1372327
+# X21   0.07829041   0.11267822 0.12808729        0.2158613
+# X22   0.15541707   0.10217324 0.08440206        0.1582459
 
 
 ###################################################
@@ -61,7 +71,7 @@ tbl
 ###################################################
 
 refit=rearrange(fit)
-show.image(refit$Global)
+show.image(refit$Joint)
 show.image(refit$Col)
 show.image(refit$Row)
 show.image(refit$Individual)
@@ -77,7 +87,7 @@ simData$X[[2]][,c(30,40)]=NA
 simData$X[[3]][,c(50,60)]=NA
 simData$X[[4]][,c(70,80)]=NA
 
-fit<-impute.BIDIFAC(list(simData$X[[1]],simData$X[[2]]),list(simData$X[[3]],simData$X[[4]]), eps.impute=1e-20, max.iter.impute=10)
+fit<-impute.BIDIFAC(list(simData$X[[1]],simData$X[[2]]),list(simData$X[[3]],simData$X[[4]]), eps.impute=1e-10, max.iter.impute=10)
 tbl.col=c(frob(fit$X1.imputed[[1]][,c(10,20)]-simData$S[[1]][,c(10,20)])/frob(simData$S[[1]][,c(10,20)]),
           frob(fit$X1.imputed[[2]][,c(30,40)]-simData$S[[2]][,c(30,40)])/frob(simData$S[[2]][,c(30,40)]),
           frob(fit$X2.imputed[[1]][,c(50,60)]-simData$S[[3]][,c(50,60)])/frob(simData$S[[3]][,c(50,60)]),
@@ -85,4 +95,5 @@ tbl.col=c(frob(fit$X1.imputed[[1]][,c(10,20)]-simData$S[[1]][,c(10,20)])/frob(si
 names(tbl.col)=c("X11","X12","X21","X22")
 tbl.col
 #       X11       X12       X21       X22 
-# 0.7043202 0.5875771 0.4798809 0.6981753 
+# 00.7131981 0.6048519 0.4965431 0.7093090 
+ 
