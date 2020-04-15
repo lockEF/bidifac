@@ -1,5 +1,5 @@
 bidifac.plus <- function(X0,p.ind,n.ind,max.comb=20,num.comp=20,max.iter=500,conv.thresh=0.001,temp.iter=100){
-# X0=X0; p.ind = p.ind; n.ind=n.ind; max.comb=20; num.comp=20; max.iter=500; conv.thresh=1
+# X0=X0; p.ind = p.ind; n.ind=n.ind; max.comb=20; num.comp=20; max.iter=500; conv.thresh=1; temp.iter=100
   n.source <- length(p.ind)
   n.type <- length(n.ind)
   X0.resid <- X0
@@ -10,8 +10,8 @@ bidifac.plus <- function(X0,p.ind,n.ind,max.comb=20,num.comp=20,max.iter=500,con
   for(i in 1:max.comb){
     S[[i]]=0
     pen[i]=0
-    n.ind.list<-c(1:dim(X0.temp)[2])
-    p.ind.list<-c(1:dim(X0.temp)[1])}
+    n.ind.list[[i]]<-c(1:dim(X0)[2])
+    p.ind.list[[i]]<-c(1:dim(X0)[1])}
   obj.vec <- c(sum(X0^2))
   #obj.vec <- c()
   temp.fac <- svd(X0,nu=0,nv=0)$d[1]/(sum(sqrt(dim(X0))))-1
@@ -23,7 +23,7 @@ bidifac.plus <- function(X0,p.ind,n.ind,max.comb=20,num.comp=20,max.iter=500,con
     }
     
    for(k in 1:max.comb){
-      print(paste(k,'*'))
+  #    print(paste(k,'*'))
       X0.temp <- X0.resid+S[[k]]
       cur.n.ind <- n.ind.list[[k]]#c(1:dim(X0.temp)[2])
       cur.p.ind <- c()
@@ -42,7 +42,7 @@ bidifac.plus <- function(X0,p.ind,n.ind,max.comb=20,num.comp=20,max.iter=500,con
         prev.n.ind <- cur.n.ind
       }
       CurPen <- res.n$CurPen
-      if(!isTRUE(all.equal(p.ind.list[[k]],cur.p.ind))&&isTRUE(all.equal(n.ind.list[[k]],cur.n.ind))){
+      if(!isTRUE(all.equal(p.ind.list[[k]],cur.p.ind))|!isTRUE(all.equal(n.ind.list[[k]],cur.n.ind))){
         Old.a <- svd(X0.temp[p.ind.list[[k]],n.ind.list[[k]]],nu=0,nv=0)$d
         New.a <- svd(X0.temp[cur.p.ind,cur.n.ind],nu=0,nv=0)$d
         OldPen <- sum(pmax(Old.a-lambda*(sqrt(length(p.ind.list[[k]]))+sqrt(length(n.ind.list[[k]]))),0)^2)
@@ -53,7 +53,14 @@ bidifac.plus <- function(X0,p.ind,n.ind,max.comb=20,num.comp=20,max.iter=500,con
           cur.n.ind = n.ind.list[[k]]
         }
       }
-      if(CurPen<=0.001){
+      Repeat=FALSE
+      if(k>1){
+      for(j in 1:(k-1)){
+        if(isTRUE(all.equal(p.ind.list[[j]],cur.p.ind))&&isTRUE(all.equal(n.ind.list[[j]],cur.n.ind))){
+          Repeat=TRUE
+        }
+      }}
+      if(CurPen<=0.001|Repeat){
         pen = pen[-k]
         S[[k]] <- NULL
         pen[max.comb]=0
@@ -80,10 +87,14 @@ bidifac.plus <- function(X0,p.ind,n.ind,max.comb=20,num.comp=20,max.iter=500,con
     if(abs(obj.cur-obj.prev)<conv.thresh) break
     obj.prev <- sum(X0.resid^2)+2*sum(pen)
   }
-  Sums <- array(dim=c(max.comb,n.source,n.type))
-  for(kk in 1:max.comb){for(j in 1:n.source){ for(i in 1:n.type){
+  num.modules=k
+  if(S[[max.comb]]==0) num.modules=k-1
+  Sums <- array(dim=c(num.modules,n.source,n.type))
+  for(kk in 1:num.modules){for(j in 1:n.source){ for(i in 1:n.type){
     Sums[kk,j,i] = sum(S[[kk]][p.ind[[j]],n.ind[[i]]]^2)
   }}}
+  p.ind.list=p.ind.list[1:num.modules]
+  n.ind.list=n.ind.list[1:num.modules]
   return(list(S=S,p.ind.list=p.ind.list,n.ind.list=n.ind.list,Sums=Sums,obj.vec=obj.vec))
 }
 
@@ -130,3 +141,4 @@ bidifac.cycle <- function(X0.temp,x.ind,num.comp,lambda){
 #  }
     return(list(cur.x.ind=cur.x.ind,CurPen=CurPen))
 }
+
