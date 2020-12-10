@@ -2,6 +2,8 @@ bidifac.plus.given <- function(X0,p.ind,n.ind,p.ind.list,n.ind.list, S = list(),
 
   n.source <- length(p.ind)
   n.type <- length(n.ind)
+  max.comb=length(p.ind.list)
+  lambda=1
 if(given.inits==FALSE){
   for(i in 1:max.comb){
     S[[i]]=0
