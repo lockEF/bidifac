@@ -23,6 +23,7 @@ X[p.ind[[1]],n.ind[[1]]] = X[p.ind[[1]],n.ind[[1]]]+I
 
 #install package RSpectra
 #library(RSpectra)
+#load functions in script bidifac.plus
 
 #run bidifac+
 res <- bidifac.plus(X0=X,p.ind=p.ind,n.ind=n.ind)
@@ -31,10 +32,26 @@ res <- bidifac.plus(X0=X,p.ind=p.ind,n.ind=n.ind)
 
 #test accuracy 
 #here first module, res$S[[1]], corresponds to global structure
+#(note: order of modules may change with a different random seed)
 sum(res$S[[1]]-J)^2/sum(J^2)
-#res$S[[2]] corresponds to R
-sum(res$S[[2]][res$p.ind.list[[2]],res$n.ind.list[[2]]]-R)^2/sum(R^2)
-#res$S[[3]] corresponds to C
-sum(res$S[[3]][p.ind.list[[3]],res$n.ind.list[[3]]]-C)^2/sum(C^2)
+#res$S[[2]] corresponds to C
+sum(res$S[[2]][res$p.ind.list[[2]],res$n.ind.list[[2]]]-C)^2/sum(C^2)
+#res$S[[3]] corresponds to R
+sum(res$S[[3]][res$p.ind.list[[3]],res$n.ind.list[[3]]]-R)^2/sum(R^2)
 #res$S[[4]] corresponds to I
-sum(res$S[[4]][p.ind.list[[4]],res$n.ind.list[[4]]]-I)^2/sum(I^2)
+sum(res$S[[4]][res$p.ind.list[[4]],res$n.ind.list[[4]]]-I)^2/sum(I^2)
+
+
+#####Missing data imputation
+
+#Randomly set 10% of values to missing
+X.miss=X
+all.miss=sample(c(1:prod(dim(X))),prod(dim(X))/10)
+X.miss[all.miss]=NA
+#impute results, simulatneously estimatying all possible modules (given by p.ind.list and n.ind.list)
+p.ind.list=list(c(1:100),c(1:50),c(1:50),c(51:100),c(51:100),c(51:100),c(1:50),c(1:100),c(1:100))
+n.ind.list=list(c(1:200),c(1:100),c(101:200),c(1:100),c(101:200),c(1:200),c(1:200),c(1:100),c(101:200))
+res.impute<-bidifac.plus.impute(X0=X.miss,p.ind=p.ind,n.ind=n.ind,p.ind.list,n.ind.list,all.miss=all.miss,conv.thresh=0.1,max.iter=200)
+
+#check relative error of imputed values
+sum(res.impute$Sig[all.miss]-X[all.miss])^2/sum(X[all.miss]^2)
