@@ -34,7 +34,7 @@ eb.glob.imp<-function(X,kap=NULL,max.iter=100,conv.thresh=0.1){
     A.prev=A
   }
   for(i in 1:max.iter){
-    A=eb.glob.o2(X,sig=sig.est)
+    A=eb.glob.o(X,sig=sig.est)
     X[isna]=A[isna]
     sig.est=get_sigma(X)*length(X)/(length(X)-sum(isna))
     if(sum((A.prev-A)^2)<conv.thresh) break
@@ -131,7 +131,7 @@ glob.bidi.imp <- function(X,p.ind,n.ind,p.ind.list,n.ind.list, conv.thresh=0.1,m
     S.scale.prev=S.scale
     for(k in 1:K){
       Resid=Xs-Reduce('+',S[-k])
-      S[[k]][p.ind.list[[k]],n.ind.list[[k]]]=eb.glob.o2(Resid[p.ind.list[[k]],n.ind.list[[k]]],sig=1)
+      S[[k]][p.ind.list[[k]],n.ind.list[[k]]]=eb.glob.o(Resid[p.ind.list[[k]],n.ind.list[[k]]],sig=1)
       #set to 0 anything that is missing entire row or column
       S[[k]][p.ind.list[[k]],n.ind.list[[k]]][,colSums(isna[p.ind.list[[k]],n.ind.list[[k]]])==length(p.ind.list[[k]])]=0
       S[[k]][p.ind.list[[k]],n.ind.list[[k]]][rowSums(isna[p.ind.list[[k]],n.ind.list[[k]]])==length(n.ind.list[[k]]),]=0
@@ -203,5 +203,34 @@ get_sigma <- function(X,lb=0.1,ub=NULL,kappa=NULL){
   sig=sig.vec[which.min(om)]
   return(sig)
 }
+
+nn.app <- function(X){
+  N=dim(X)[2]
+  D=dim(X)[1]
+  svd.x=svd(X)
+  dvec=rep(0,length(svd.x$d))
+  ind = svd.x$d>sqrt(D)+sqrt(N)
+  dvec[ind]=svd.x$d[ind]-sqrt(D)-sqrt(N)
+  A.est = svd.x$u%*%diag(dvec)%*%t(svd.x$v)
+  return(A.est)
+}
+
+nn.app.imp <- function(X){
+  isna=is.na(X)
+  X[isna]=0
+  A.prev=0
+  for(i in 1:100){
+    A=nn.app(X)
+    X[isna]=A[isna]
+    if(sum((A.prev-A)^2)<1) break
+    print(sum((A.prev-A)^2))
+    A.prev=A
+    print(i)
+  }
+  return(A)
+}
+ 
+ 
+
  
  
