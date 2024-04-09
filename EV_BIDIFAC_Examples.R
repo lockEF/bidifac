@@ -51,7 +51,7 @@ X[,n.ind[[1]]] = X[,n.ind[[1]]]+C
 I = rnorm(p.vec[1])%*%t(rnorm(n.vec[1]))
 X[p.ind[[1]],n.ind[[1]]] = X[p.ind[[1]],n.ind[[1]]]+I
 #p.ind.list and n.ind.list give modules of shared/individual structure defined on row and column sets
-#here, they enumeate all possibilities:
+#here, they enumerate all possibilities:
 p.ind.list=list(c(1:100),c(1:100),c(1:100),p.ind[[1]],p.ind[[2]],p.ind[[1]],p.ind[[1]],p.ind[[2]],p.ind[[2]])
 n.ind.list=list(c(1:200),n.ind[[1]],n.ind[[2]],c(1:200),c(1:200),n.ind[[1]],n.ind[[2]],n.ind[[1]],n.ind[[2]])
 #estimate underlying structure and decomposition
@@ -82,5 +82,4 @@ res.impute<-glob.bidi.imp(X.miss,p.ind=p.ind,n.ind=n.ind,p.ind.list,n.ind.list)
 A.est=Reduce('+',res.impute$S)
 
 #check relative error of imputed values
-sum(A.est[all.miss]-X[all.miss])^2/sum(X[all.miss]^2)
-
+sum((A.est[all.miss]-X[all.miss])^2)/sum(X[all.miss]^2)
