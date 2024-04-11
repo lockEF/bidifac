@@ -174,7 +174,7 @@ BIDIFAC=function(data,rmt=T, sigma=NULL,
                  start=NULL, out=FALSE,
                  eps=1e-3, max.iter=1000, pbar=TRUE, seed=NULL, ...){
   if (!is.null(seed)){set.seed(seed)}
-  if (!rmt & class(sigma)!="matrix") stop("sigma must be a matrix.")
+  if (!rmt & !is.matrix(sigma)) stop("sigma must be a matrix.")
   
   fit=data.rearrange(data, rmt, sigma)
   sigma.mat=fit$sigma.mat
